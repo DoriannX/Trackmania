@@ -1,0 +1,26 @@
+[
+	{
+		"file": "/home/dodo/Documents/Unreal Projects/Trackmania/Source/Trackmania/Trackmania.Build.cs",
+		"arguments": [
+			"/home/dodo/UnrealEngine/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v23_clang-18.1.0-rockylinux8/x86_64-unknown-linux-gnu/bin/clang++",
+			"@/home/dodo/Documents/Unreal Projects/Trackmania/.vscode/compileCommands_Trackmania/Trackmania.1.rsp"
+		],
+		"directory": "/home/dodo/UnrealEngine/Engine/Source"
+	},
+	{
+		"file": "/home/dodo/Documents/Unreal Projects/Trackmania/Source/Trackmania/Trackmania.cpp",
+		"arguments": [
+			"/home/dodo/UnrealEngine/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v23_clang-18.1.0-rockylinux8/x86_64-unknown-linux-gnu/bin/clang++",
+			"@/home/dodo/Documents/Unreal Projects/Trackmania/.vscode/compileCommands_Trackmania/Trackmania.1.rsp"
+		],
+		"directory": "/home/dodo/UnrealEngine/Engine/Source"
+	},
+	{
+		"file": "/home/dodo/Documents/Unreal Projects/Trackmania/Source/Trackmania/Trackmania.h",
+		"arguments": [
+			"/home/dodo/UnrealEngine/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v23_clang-18.1.0-rockylinux8/x86_64-unknown-linux-gnu/bin/clang++",
+			"@/home/dodo/Documents/Unreal Projects/Trackmania/.vscode/compileCommands_Trackmania/Trackmania.1.rsp"
+		],
+		"directory": "/home/dodo/UnrealEngine/Engine/Source"
+	}
+]
