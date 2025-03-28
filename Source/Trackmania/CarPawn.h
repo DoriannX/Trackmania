@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
+#include "Components/Widget.h"
 #include "GameFramework/Pawn.h"
 #include "CarPawn.generated.h"
 
@@ -26,8 +28,25 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void StartMove(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void ApplySpeed(float DeltaTime);
+
+	UFUNCTION()
+	void TryApplyVelocity(float DeltaTime);
+
+	UFUNCTION()
+	void Decelerate(float DeltaTime);
+
+	UFUNCTION()
+	bool IsGrounded() const;
 protected:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
+	class UInputAction* MoveForwardAction;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UMeshComponent* Visual;
 	
@@ -40,7 +59,23 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxCollision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float TargetSpeed;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float CurrentSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float Acceleration;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float DecelerationForce;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+    float SmoothSpeedApplySpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	FVector LastAppliedVel;
 
 };
+
