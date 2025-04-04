@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
 #include "CarPawn.generated.h"
 
@@ -33,7 +34,13 @@ protected:
 	void StartMove(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void ApplySpeed(float DeltaTime);
+	void StopMove(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void InverseGravity(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void ApplyGravity(const float DeltaTime);
 
 	UFUNCTION()
 	void TryApplyVelocity(float DeltaTime);
@@ -41,8 +48,17 @@ protected:
 	UFUNCTION()
 	void Decelerate(float DeltaTime, float Multiplier);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	bool IsGrounded() const;
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	void Accelerate(float Multiplier);
+	
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	void ResetAcceleration();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Movement")
+	void IncreaseBoostFuel();
 #pragma endregion
 
 #pragma region Rotation
@@ -50,13 +66,10 @@ protected:
 	void StartRotate(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void ApplyRotationSpeed(float DeltaTime);
+	void StopRotate(const FInputActionValue& Value);
 
 	UFUNCTION()
 	void ApplyRotation(float DeltaTime);
-
-	UFUNCTION()
-	void DecelerateRotation(float DeltaTime);
 #pragma endregion
 
 #pragma region Look
@@ -75,15 +88,16 @@ protected:
 	class UInputAction* MoveForwardAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
-	class UInputAction* RotateAction;
+	UInputAction* RotateAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
 	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
+	UInputAction* InverseAction;
 #pragma endregion
 	
 #pragma region Components
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Component, meta = (AllowPrivateAccess = "true"))
-	UMeshComponent* Visual;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Component, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraArm;
@@ -92,60 +106,48 @@ protected:
 	UCameraComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Component, meta=(AllowPrivateAccess = "true"))
-	UStaticMeshComponent* PhysicsRootComponent;
+	UStaticMeshComponent* CarBody;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Component, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* PivotObject;
 	
 #pragma endregion 
 
 #pragma region Movement
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float MovementValue;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
-	float CurrentSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float Acceleration;
 	
+	UPROPERTY()
+	float DefaultAcceleration;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float DecelerationForce;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
-	FVector LastAppliedVel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"));
+	float GravityScale;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
-	float HoverForce;
-
-	UPROPERTY()
-	float CurrentDirection;
-
-	UPROPERTY()
-	float CurrentRotation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bDrifted;
-
-	UPROPERTY()
-	float TargetVel ;
+	float JumpForce;
 #pragma endregion
 
 #pragma region Rotation
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
 	float RotationSpeedValue;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
-	float CurrentRotationSpeed;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
 	float RotationAcceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
-	float RotationDeceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
 	UCurveFloat* RotationSpeedCurve;
 
 	UPROPERTY()
-	FVector GroundNormalVector;	
+	FVector GroundNormalVector;
+
+	UPROPERTY()
+	float CurrentRotation;
 #pragma endregion
 };
 
