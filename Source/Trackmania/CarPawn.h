@@ -41,7 +41,7 @@ protected:
 
 	UFUNCTION()
 	void ApplyGravity(const float DeltaTime);
-
+	
 	UFUNCTION()
 	void TryApplyVelocity(float DeltaTime);
 
@@ -114,7 +114,7 @@ protected:
 #pragma endregion 
 
 #pragma region Movement
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float MovementValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
@@ -126,6 +126,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float DecelerationForce;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite , Category=Movement, meta=(AllowPrivateAccess="true"))
+	FVector CarForward;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"));
 	float GravityScale;
 
@@ -134,7 +137,7 @@ protected:
 #pragma endregion
 
 #pragma region Rotation
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Rotation, meta=(AllowPrivateAccess="true"))
 	float RotationSpeedValue;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Rotation, meta=(AllowPrivateAccess="true"))
@@ -149,5 +152,8 @@ protected:
 	UPROPERTY()
 	float CurrentRotation;
 #pragma endregion
+
+	UFUNCTION(BlueprintCallable, Category=Timer)
+	static FString GetFormatedTime(float Time);
 };
 

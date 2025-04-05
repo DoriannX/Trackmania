@@ -75,15 +75,33 @@ void ACarPawn::StopMove(const FInputActionValue& Value)
 
 void ACarPawn::InverseGravity(const FInputActionValue& Value)
 {
-	if (IsGrounded())
+	const float CarExtent = CarBody->Bounds.BoxExtent.Z/2;
+	const FVector Start = GetActorLocation() + GetActorUpVector() * CarExtent;
+	const FVector End = Start + PivotObject->GetUpVector() * 9999;
+	
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	
+	const bool bIsCeilingOnTop = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_WorldStatic,
+		QueryParams
+	);
+	if (!bIsCeilingOnTop)
 	{
-		CarBody->SetPhysicsLinearVelocity(FVector(GetVelocity().X, GetVelocity().Y, JumpForce * GravityScale));
+		return;
 	}
+
+
+	
 	GravityScale = -GravityScale;
 	PivotObject->SetWorldRotation(FRotator(0 , PivotObject->GetComponentRotation().Yaw, PivotObject->GetComponentRotation().Roll + 180));
 	CameraArm->SetRelativeRotation(FRotator(-CameraArm->GetRelativeRotation().Pitch ,
 											 CameraArm->GetRelativeRotation().Yaw, CameraArm->GetRelativeRotation().Roll));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Gravity Inversed"));
+	CarBody->SetWorldLocation(HitResult.Location + HitResult.Normal * CarExtent * 2);
 }
 
 void ACarPawn::ApplyGravity(const float DeltaTime)
@@ -105,7 +123,7 @@ void ACarPawn::TryApplyVelocity(float DeltaTime)
 	}
 
 	CarBody->SetPhysicsLinearVelocity(
-		GetVelocity() + GetActorForwardVector() * MovementValue * ((MovementValue > 0)
+		GetVelocity() + CarForward * MovementValue * ((MovementValue > 0)
 			                                                           ? Acceleration
 			                                                           : Acceleration * .5f) * DeltaTime * 100);
 }
@@ -126,18 +144,7 @@ bool ACarPawn::IsGrounded() const
 		End,
 		ECC_WorldStatic,
 		QueryParams
-	);
-	
-	DrawDebugLine(GetWorld(), Start, End, bGrounded ? FColor::Green : FColor::Red, true, 0.1f);
-	
-	if (bGrounded)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, TEXT("Vehicle Grounded"));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, TEXT("Vehicle Not Grounded"));
-	}
+	); 
 	
 	return bGrounded;
 }
@@ -180,11 +187,12 @@ void ACarPawn::StopRotate(const FInputActionValue& Value)
 
 void ACarPawn::ApplyRotation(const float DeltaTime)
 {
+	float Direction = (FMath::Abs(MovementValue) < KINDA_SMALL_NUMBER) ? 0.0f : (FVector::DotProduct(GetVelocity(), CarForward) >= 0 ? 1.0f : -1.0f);
 	const float MaxSpeed = (Acceleration * 10000) / DecelerationForce;
 	const float Rotation = RotationSpeedValue * RotationAcceleration * DeltaTime * RotationSpeedCurve->GetFloatValue(
 		FMath::Clamp(FMath::Abs(GetVelocity().Size()) / MaxSpeed, 0.0f, 1.0f)) * ((MovementValue == 0)
 		? 1
-		: MovementValue);
+		: FMath::Abs(MovementValue) * Direction);
 	CurrentRotation += Rotation;
 	SetActorRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), CurrentRotation));
 }
@@ -199,9 +207,9 @@ void ACarPawn::StartLook(const FInputActionValue& InputActionValue)
 	{
 		return;
 	}
-	FRotator CurrentRotation = CameraArm->GetRelativeRotation();
-	CameraArm->SetRelativeRotation(FRotator(FMath::Clamp(CurrentRotation.Pitch + LookValue.Y * GravityScale, (GravityScale > 0) ? -50 : 0, GravityScale > 0 ? 0 : 50),
-	                                     CurrentRotation.Yaw + LookValue.X, CurrentRotation.Roll));
+	FRotator CurrentRotationLook = CameraArm->GetRelativeRotation();
+	CameraArm->SetRelativeRotation(FRotator(FMath::Clamp(CurrentRotationLook.Pitch + LookValue.Y * GravityScale, (GravityScale > 0) ? -50 : 0, GravityScale > 0 ? 0 : 50),
+	                                     CurrentRotationLook.Yaw + LookValue.X, CurrentRotationLook.Roll));
 }
 
 void ACarPawn::SmoothlyResetLook(const float DeltaTime) const
@@ -218,3 +226,9 @@ void ACarPawn::SmoothlyResetLook(const float DeltaTime) const
 }
 
 #pragma endregion
+
+FString ACarPawn::GetFormatedTime(const float Time)
+{
+	return FString::Printf(TEXT("%02lld:%02lld:%02lld"), FMath::FloorToInt(fmod(Time / 60, 60)), FMath::FloorToInt(fmod(Time, 60)),
+	FMath::FloorToInt(fmod(Time * 100, 100)));
+}
