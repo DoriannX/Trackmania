@@ -43,7 +43,7 @@ protected:
 	void ApplyGravity(const float DeltaTime);
 	
 	UFUNCTION()
-	void TryApplyVelocity(float DeltaTime);
+	void TryApplyVelocity(float DeltaTime) const;
 
 	UFUNCTION()
 	void Decelerate(float DeltaTime, float Multiplier);

@@ -115,7 +115,7 @@ void ACarPawn::Decelerate(const float DeltaTime, const float Multiplier = 1.0f)
 		GetVelocity() - GetVelocity() * DecelerationForce * DeltaTime / 100 * Multiplier);
 }
 
-void ACarPawn::TryApplyVelocity(float DeltaTime)
+void ACarPawn::TryApplyVelocity(const float DeltaTime) const
 {
 	if (!IsGrounded())
 	{
